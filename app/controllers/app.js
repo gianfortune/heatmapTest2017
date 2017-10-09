@@ -5,23 +5,20 @@ heatmapApp.controller('heatmapController', class heatmapController {
     // Define global variables
     this.startedDrawing = false
     let context = this
-    let triangleCoords = [
-       {lat: 25.774, lng: -80.190},
-       {lat: 18.466, lng: -66.118},
-       {lat: 32.321, lng: -64.757},
-       {lat: 25.774, lng: -80.190}
-     ]
     this.mapOptions = {
         zoom: 4,
-        center: new google.maps.LatLng(41.923, 12.513),
+        center: new google.maps.LatLng(37.782551, -122.445368),
         mapTypeId: google.maps.MapTypeId.TERRAIN
     }
+    // Creates new map object
     this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions)
+    // Creates heatmap visualization layer
     this.heatmap = new google.maps.visualization.HeatmapLayer({
       data: this.getPoints(),
       map: this.map
     })
 
+    // Creates drawing manager object
     this.drawingManager = new google.maps.drawing.DrawingManager({
       drawingMode: google.maps.drawing.OverlayType.MARKER,
       drawingControl: false,
@@ -40,6 +37,10 @@ heatmapApp.controller('heatmapController', class heatmapController {
       }
     })
 
+    // drawingManager eventListener:  uses an anonymous function to get the coordinates
+    //    of the user defined polygon.  Calls checkInsidePolygon() to change rendering of heatmap points
+    // Inputs: drawingManager (obj), eventType (string), anonymousFunction (func)
+    // Returns: null
     google.maps.event.addListener(this.drawingManager, 'overlaycomplete', function(event) {
       var len = event.overlay.getPath().getLength();
       var htmlStr = "";
@@ -52,6 +53,10 @@ heatmapApp.controller('heatmapController', class heatmapController {
     })
   }
 
+  // checkInsidePolygon():  takes in polygon coordinates to check each heatmap point
+  //    to see if each point resides within the polygon
+  // Inputs: coordinates (Array)
+  // Returns: null
   checkInsidePolygon (coordinates) {
     this.heatmap.setMap(null)
     let heatMapCoord = this.getPoints()
@@ -68,21 +73,33 @@ heatmapApp.controller('heatmapController', class heatmapController {
     })
   }
 
+  // startDrawingTool():  sets Drawing mode for canvas
+  // Inputs: null
+  // Returns: null
   startDrawingTool () {
     this.startedDrawing = true
     this.drawingManager.setMap(this.map)
     this.drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYGON)
   }
 
+  // hideDrawingTool():  removes Drawing mode for canvas
+  // Inputs: null
+  // Returns: null
   hideDrawingTool () {
     this.drawingManager.setDrawingMode(null)
     this.startedDrawing = false
   }
 
+  // toggleHeatmap():  sets Map for canvas
+  // Inputs: null
+  // Returns: null
   toggleHeatmap() {
     this.heatmap.setMap(this.heatmap.getMap() ? null : this.map);
   }
 
+  //changeGradient():  sets colors mode for heatmap layer
+  // Inputs: null
+  // Returns: null
   changeGradient() {
     let gradient = [
       'rgba(0, 255, 255, 0)',
@@ -103,6 +120,9 @@ heatmapApp.controller('heatmapController', class heatmapController {
     this.heatmap.set('gradient', this.heatmap.get('gradient') ? null : gradient);
   }
 
+  // getButtonClass():  gets button classes based upon state
+  // Inputs: button code (string)
+  // Returns: cssClass (string)
   getButtonClass (code) {
     switch (code){
       case '_TOGGLEHEAT':
@@ -118,14 +138,23 @@ heatmapApp.controller('heatmapController', class heatmapController {
     }
   }
 
+  // changeRadius():  sets radius for heatmap Layer
+  // Inputs: null
+  // Returns: null
   changeRadius() {
     this.heatmap.set('radius', this.heatmap.get('radius') ? null : 20);
   }
 
+  // changeOpacity():  sets opacity for heatmap layer
+  // Inputs: null
+  // Returns: null
   changeOpacity() {
     this.heatmap.set('opacity', this.heatmap.get('opacity') ? null : 0.2);
   }
 
+  // getPoints():  gets raw data coordinates and transforms them to google LatLng objects
+  // Inputs: null
+  // Returns: returningArray (Array)
   getPoints() {
       let valueArray = this.getPointsRaw()
       let returningArray = []
@@ -135,6 +164,9 @@ heatmapApp.controller('heatmapController', class heatmapController {
       return returningArray
     }
 
+  // getPointsRaw():  temporarily gets the raw array of coordinates
+  // Inputs: null
+  // Returns: coordinates (Array)
   getPointsRaw () {
     return [
     [37.782551, -122.445368],
