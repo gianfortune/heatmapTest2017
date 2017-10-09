@@ -6,7 +6,7 @@ heatmapApp.controller('heatmapController', class heatmapController {
     this.startedDrawing = false
     let context = this
     this.mapOptions = {
-        zoom: 4,
+        zoom: 13,
         center: new google.maps.LatLng(37.782551, -122.445368),
         mapTypeId: google.maps.MapTypeId.TERRAIN
     }
