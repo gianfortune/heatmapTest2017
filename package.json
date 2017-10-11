@@ -25,9 +25,5 @@
     "angular-material": "^1.1.5",
     "angular-messages": "^1.5.5",
     "lodash": "^4.17.4"
-  },
-  "devDependencies": {
-    "bower": "^1.8.0",
-    "http-server": "^0.10.0"
   }
 }
