@@ -74,6 +74,9 @@ heatmapApp.controller('heatmapController', class heatmapController {
     xmlHttp.send(null)
   }
 
+  // getMedianInformation(): creates URL and gets data from external API's
+  // Inputs: coordinates (Array)
+  // Returns: medianArray (array)
   getMedianInformation (coordinates) {
     let urlArray = []
     let tempLat = parseInt(coordinates[0]) // Temporary numbers to just get a set of coordinates
@@ -218,6 +221,9 @@ heatmapApp.controller('heatmapController', class heatmapController {
       return returningArray
     }
 
+  // getPointsRawr():  gets raw data coordinates and transforms them to google LatLng objects
+  // Inputs: null
+  // Returns: returningArray (Array)
   getPointsRaw () {
     return [
     [37.782551, -122.445368],
