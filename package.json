@@ -25,5 +25,7 @@
     "angular-messages": "^1.5.5",
     "http-server": "^0.10.0",
     "lodash": "^4.17.4"
-  }
+  },"devDependencies": {
+    "http-server": "^0.10.0"
+  },
 }
