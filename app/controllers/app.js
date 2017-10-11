@@ -5,17 +5,25 @@ heatmapApp.controller('heatmapController', class heatmapController {
     // Define global variables
     this.startedDrawing = false
     let context = this
+    let centerCoord = [37.782551, -122.445368]
+    this.medianCoordinates = Promise.resolve(this.getMedianInformation(centerCoord))
     this.mapOptions = {
         zoom: 13,
-        center: new google.maps.LatLng(37.782551, -122.445368),
+        center: new google.maps.LatLng(centerCoord[0], centerCoord[1]),
         mapTypeId: google.maps.MapTypeId.TERRAIN
     }
     // Creates new map object
     this.map = new google.maps.Map(document.getElementById('map'), this.mapOptions)
     // Creates heatmap visualization layer
     this.heatmap = new google.maps.visualization.HeatmapLayer({
-      data: this.getPoints(),
+      data: [],
       map: this.map
+    })
+    this.medianCoordinates.then((medianCoordinates) => {
+      this.heatmap = new google.maps.visualization.HeatmapLayer({
+        data: this.getPoints(medianCoordinates),  // This would be swapped with the getResolvedPoints() to use real data
+        map: this.map
+      })
     })
 
     // Creates drawing manager object
@@ -51,6 +59,43 @@ heatmapApp.controller('heatmapController', class heatmapController {
       }
       context.checkInsidePolygon(valueArray)
     })
+  }
+
+  // httpGetAsync(): gets asynchronous data from url source
+  // Inputs: theUrl (string), callback (function)
+  // Returns: null
+  httpGetAsync(theUrl, callback){
+    var xmlHttp = new XMLHttpRequest()
+    xmlHttp.onreadystatechange = function() {
+      if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+        callback(xmlHttp.responseText)
+    }
+    xmlHttp.open("GET", theUrl, true)
+    xmlHttp.send(null)
+  }
+
+  // getMedianInformation(): creates URL and gets data from external API's
+  // Inputs: coordinates (Array)
+  // Returns: medianArray (array)
+  getMedianInformation (coordinates) {
+    let urlArray = []
+    let tempLat = parseInt(coordinates[0]) // Temporary numbers to just get a set of coordinates
+    let tempLng = parseInt(coordinates[1])
+    let medianArray = {results: [], length: 10}
+    for (var i = 0; i < medianArray.length; i++) {
+      tempLat = parseInt(tempLat) + .10
+      tempLng = parseInt(tempLng) + .10
+      const url = 'https://www.broadbandmap.gov/broadbandmap/demographic/2014/coordinates?latitude=' + tempLat + '&longitude=' + tempLng + '&format=json'
+      this.httpGetAsync(url, (data) => { // This needs to be returned in a promise?
+        let dataObj = JSON.parse(data)
+        medianArray.results.push({
+            lat: tempLat,
+            lang: tempLng,
+            median: dataObj.Results.medianIncome
+        })
+      })
+    }
+    return medianArray
   }
 
   // checkInsidePolygon():  takes in polygon coordinates to check each heatmap point
@@ -152,6 +197,18 @@ heatmapApp.controller('heatmapController', class heatmapController {
     this.heatmap.set('opacity', this.heatmap.get('opacity') ? null : 0.2);
   }
 
+  // getResolvedPoints():  gets raw data coordinates and transforms them to google LatLng objects
+  // Inputs: null
+  // Returns: returningArray (Array)
+  // TODO: Currently not working with async
+  getResolvedPoints (coordinates) {
+    let returningArray = []
+    coordinates.results.forEach((data) => {
+      returningArray.push(new google.maps.LatLng(data.lat,data.lang))
+    })
+    return returningArray
+  }
+
   // getPoints():  gets raw data coordinates and transforms them to google LatLng objects
   // Inputs: null
   // Returns: returningArray (Array)
@@ -164,9 +221,9 @@ heatmapApp.controller('heatmapController', class heatmapController {
       return returningArray
     }
 
-  // getPointsRaw():  temporarily gets the raw array of coordinates
+  // getPointsRawr():  gets raw data coordinates and transforms them to google LatLng objects
   // Inputs: null
-  // Returns: coordinates (Array)
+  // Returns: returningArray (Array)
   getPointsRaw () {
     return [
     [37.782551, -122.445368],
